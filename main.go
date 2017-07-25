@@ -23,11 +23,7 @@ func main() {
 }
 
 func test1() {
-	fmt.Println("Hello statemachine")
-
 	sm := statemachine.NewStateMachine()
-	fmt.Printf("Main() %p\n", sm)
-
 	sm.Configure().
 		AddStates(State1, State2, State3).
 		AddTransition(State1, State2, e1).

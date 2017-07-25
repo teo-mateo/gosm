@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"log"
 )
 
 /*
@@ -83,7 +82,7 @@ func (sm *StateMachine) Trigger(event string, payload interface{}) {
 	allowedTransitions := sm.transitions[sm.currentState]
 	nextState, ok := allowedTransitions[event]
 	if !ok && sm.panicOnIllegalTransition {
-		panic(errors.New(fmt.Sprintf("attempted illegal transition: %s + %s", sm.currentState, event)))
+		panic(fmt.Errorf("attempted illegal transition: %s + %s", sm.currentState, event))
 	}
 
 	//fire exit event
@@ -115,7 +114,7 @@ func (smc *StateMachineConfig) AddState(state string) *StateMachineConfig {
 	}
 
 	if smc.sm.containsState(state) {
-		panic(errors.New(fmt.Sprintf("state machine already contains state: %s", state)))
+		panic(fmt.Errorf("state machine already contains state: %s", state))
 	}
 
 	smc.sm.states = append(smc.sm.states, state)
@@ -130,7 +129,7 @@ func (smc *StateMachineConfig) AddState(state string) *StateMachineConfig {
 
 func (smc *StateMachineConfig) AddStates(states ...string) *StateMachineConfig {
 	if len(states) == 0 {
-		log.Fatal("non-empty argument expected: states")
+		panic(errors.New("non-empty argument expected: states"))
 	}
 
 	for _, state := range states {
@@ -147,11 +146,11 @@ func (smc *StateMachineConfig) AddStates(states ...string) *StateMachineConfig {
 
 func (smc *StateMachineConfig) SetInitialState(state string) *StateMachineConfig {
 	if state == "" {
-		log.Fatal("non-empty argument expected: state")
+		panic(errors.New("non-empty argument expected: state"))
 	}
 
 	if !smc.sm.containsState(state) {
-		log.Fatal("state machine does not contain state: ", state)
+		panic(fmt.Errorf("state machine does not contain state: %s", state))
 	}
 
 	smc.sm.currentState = state
@@ -161,11 +160,11 @@ func (smc *StateMachineConfig) SetInitialState(state string) *StateMachineConfig
 func (smc *StateMachineConfig) AddTransition(fromState string, toState string, event string) *StateMachineConfig {
 
 	if !smc.sm.containsState(fromState) {
-		panic(errors.New(fmt.Sprintf("unknown state: %s", fromState)))
+		panic(fmt.Errorf("unknown state: %s", fromState))
 	}
 
 	if !smc.sm.containsState(toState) {
-		panic(errors.New(fmt.Sprintf("unknown state: %s", toState)))
+		panic(fmt.Errorf("unknown state: %s", toState))
 	}
 
 	//get transition slice for the "from" state
@@ -185,7 +184,7 @@ func (smc *StateMachineConfig) AddTransition(fromState string, toState string, e
 
 func (smc *StateMachineConfig) OnEnter(state string, f func(string, interface{})) *StateMachineConfig {
 	if !smc.sm.containsState(state) {
-		panic(errors.New(fmt.Sprintf("unknown state: %s", state)))
+		panic(fmt.Errorf("unknown state: %s", state))
 	}
 	smc.sm.onEnters[state] = f
 	return smc
@@ -193,7 +192,7 @@ func (smc *StateMachineConfig) OnEnter(state string, f func(string, interface{})
 
 func (smc *StateMachineConfig) OnExit(state string, f func(string, interface{})) *StateMachineConfig {
 	if !smc.sm.containsState(state) {
-		panic(errors.New(fmt.Sprintf("unknown state: %s", state)))
+		panic(fmt.Errorf("unknown state: %s", state))
 	}
 	smc.sm.onExits[state] = f
 	return smc
